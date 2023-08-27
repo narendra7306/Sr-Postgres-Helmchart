@@ -1,0 +1,38 @@
+apiVersion: apps/v1 
+kind: Deployment 
+metadata: 
+  name: {{ .Release.Name }}-postgres
+  namespace: monitoring
+  labels:
+    {{- include "pg-chart.labels" . | nindent 4 }}
+spec: 
+  replicas: {{ .Values.replicaCount }}
+  selector: 
+    matchLabels: 
+      {{- include "pg-chart.selectorLabels" . | nindent 6 }}
+  template: 
+    metadata: 
+      labels: 
+        {{- include "pg-chart.selectorLabels" . | nindent 8 }}
+    spec: 
+      containers: 
+        - name: {{ .Values.container.name }}
+          image: {{ .Values.container.image }}
+          imagePullPolicy: {{ .Values.container.imagePullPolicy }}
+          ports: 
+            - containerPort: {{ .Values.service.targetPort }}
+          resources:
+            {{- toYaml .Values.computerc | nindent 12 }}
+          envFrom:
+            - SecretRef:
+                name: {{ .Release.Name }}-secret
+          envFrom: 
+            - configMapRef: 
+                name: {{ .Release.Name }}-configmap
+          volumeMounts: 
+            - mountPath: /var/lib/postgresql/data 
+              name: postgredb 
+      volumes: 
+        - name: postgredb 
+          persistentVolumeClaim: 
+            claimName: {{ .Release.Name }}-pvc

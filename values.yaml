@@ -1,0 +1,48 @@
+replicaCount: 1
+
+container:
+  name: postgres
+  image: postgres:10.1
+  imagePullPolicy: IfNotPresent
+  
+service:
+  type: NodePort
+  name: pg-svc
+  port: 5432
+  targetPort: 5432
+  nodePort: 32000
+
+computerc:
+  limits:
+    cpu: "100m"
+    memory: "500Mi"
+  requests:
+    cpu: "100m"
+    memory: "500Mi"
+
+hpa:
+  enabled: true
+  maxReplicas: 5
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 20
+
+config:
+  name: config.json
+  data:
+    POSTGRES_DB: postgresdb 
+    POSTGRES_USER: admin 
+    POSTGRES_PASSWORD: test123
+
+secret:
+  data:
+    POSTGRES_HOST: MTI3LjAuMC4x
+    POSTGRES_PORT: NTQzMg==
+    POSTGRES_DB: cG9zdGdyZXNkYg==
+    POSTGRES_USER: YWRtaW4=
+    POSTGRES_PASSWORD: dGVzdDEyMw==
+
+pvc:
+  storageClassName: standard
+  accessMode: ReadWriteOnce
+  storageSize: 2Gi
+
